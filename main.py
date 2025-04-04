@@ -1,11 +1,12 @@
 # this allows us to use code from
 # the open-source pygame library
 # throughout this file
-import pygame
+import pygame, sys
 from constants import *
 from player import *
+from asteroidfield import *
 
-class Asteroids:
+class AsteroidsGame:
 
 	def __init__(self):
 		self.clock = None
@@ -22,6 +23,14 @@ class Asteroids:
 			        return
 			# updates here
 			self.updatables.update(self.dt)
+			for obj in self.asteroids:
+				if obj.collision_check(self.player):
+					print("Game over!")
+					sys.exit(0)
+				for bullet in self.bullets:
+					if obj.collision_check(bullet):
+						obj.split()
+						bullet.kill()
 			# rendering nonsense beyond this point
 			self.screen.fill("black")
 			for drawable in self.drawables:
@@ -35,7 +44,13 @@ class Asteroids:
 		self.clock = pygame.time.Clock()
 		self.updatables = pygame.sprite.Group()
 		self.drawables = pygame.sprite.Group()
+		self.asteroids = pygame.sprite.Group()
+		self.bullets = pygame.sprite.Group()
 		Player.containers = (self.updatables, self.drawables)
+		Asteroid.containers = (self.asteroids, self.updatables, self.drawables)
+		AsteroidField.containers = (self.updatables)
+		Shot.containers = (self.bullets, self.updatables, self.drawables)
+		self.asteroid_field = AsteroidField()
 		self.player = Player(
 			SCREEN_WIDTH / 2,
 			SCREEN_HEIGHT / 2
@@ -46,5 +61,5 @@ class Asteroids:
 		self.mainloop()
 
 if __name__ == "__main__":
-    game = Asteroids()
+    game = AsteroidsGame()
     game.main()
